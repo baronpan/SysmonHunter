@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block head %}
+    <link href='/static/css/datatables.min.css' rel='stylesheet' type='text/css'>
+    <link href='/static/css/daterangepicker.css' rel='stylesheet' type='text/css'>
+    <link href='/static/css/select.dataTables.min.css' rel='stylesheet' type='text/css'>
+    <link href='/static/css/buttons.dataTables.min.css' rel='stylesheet' type='text/css'>
+    <script src='/static/scripts/datatables.min.js'></script>
+    <script src='/static/scripts/moment.min.js'></script>
+    <script src='/static/scripts/daterangepicker.js'></script>
+    <script src='/static/scripts/dataTables.select.min.js'></script>
+    <script src='/static/scripts/dataTables.buttons.min.js'></script>
+{% endblock %}
+
+{% block container %}
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">Select timerange: </span>
+          </div>
+        <div class="input-group-prepend">
+            <input type="text" id="daterange">
+        </div>   
+        <div class="input-group-prepend">
+                <button type="button" class="btn btn-primary" id="search">Search</button> 
+        </div>
+    </div>
+    <div>
+        
+        <table id="table">
+        </table>
+    </div>
+    <div class="modal fade bd-example-modal-xl" tabindex="-1" role="dialog" aria-labelledby="myExtraLargeModalLabel" aria-hidden="true" id="detaildlg">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Behavior Details</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    </div>
+                    <div class="modal-body">
+                            <div class="input-group mb-3"></div>
+                        <div>
+                        <table id="detailtable">
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function() {
+            $('#daterange').daterangepicker();
+
+            $('#search').click(function() {
+                daterange = $('#daterange').val();
+                
+                var table = $('#table').DataTable({
+                    destroy: true,
+                    select: 'single',
+                    search: {
+                        regex: true,
+                    },
+                    autoWidth: false,
+                    ajax: {
+                        url: '/ajax/statistic/behavior/registry/list',
+                        type: 'POST',
+                        data: {
+                            'daterange': daterange,
+                        },
+                    },
+                    columns: [
+                        { 'data': 'regpath', "searchable": true, 'title': 'Registry Path'},
+                        { 'data': 'count', "searchable": true, 'title': 'Occurs'},
+                    ],
+                    dom: 'Blfrtip',
+                    buttons: [
+                        {
+                            text: 'Selected Behavior Details',
+                            action: function(e, dt, node, config) {
+                                $('#detaildlg').modal();
+                                $('#detailtable').DataTable({
+                                    destroy: true,
+                                    autoWidth: false,
+                                    ajax: {
+                                        url: '/ajax/statistic/behavior/registry/detail',
+                                        type: 'POST',
+                                        data: {
+                                            'regcond': dt.rows('.selected').data()[0]['regpath'],
+                                            'daterange': $('#daterange').val(),
+                                        },
+                                    },
+                                    columns: [
+                                        { 'data': 'epid', "searchable": true, 'title': 'Endpoint'},
+                                        { 'data': 'timestamp', "searchable": true, 'title': 'Timestamp'},
+                                        { 'data': 'behavior', "searchable": true, 'title': 'BehaviorType'},
+                                        { 'data': 'attck', "searchable": true, 'title': 'ATT&CK IDs'},
+                                        { 'data': 'value', "searchable": true, 'title': 'Value'},
+                                    ],
+                                });
+                            },
+                        }
+                    ]
+                });
+            })
+
+            
+        });
+    </script>
+{% endblock %}

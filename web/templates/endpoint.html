@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block head %}
+    <link href='/static/css/datatables.min.css' rel='stylesheet' type='text/css'>
+    <link href='/static/css/daterangepicker.css' rel='stylesheet' type='text/css'>
+    <script src='/static/scripts/datatables.min.js'></script>
+    <script src='/static/scripts/moment.min.js'></script>
+    <script src='/static/scripts/daterangepicker.js'></script>
+    <script src='/static/scripts/d3.v4.3.0.min.js'></script>
+    <script src='/static/scripts/dimple.v2.3.0.min.js'></script>
+{% endblock %}
+
+{% block container %}
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="inputGroup-sizing-default">Endpoint UUID: </span>
+        </div>
+        <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="epid">
+        <div class="input-group-prepend">
+            <input type="text" id="daterange">
+        </div>   
+        
+        <div class="input-group-prepend">
+            <select class="custom-select" id="behavtype">
+                <option value="All" selected>All</option>
+                <option value="ProcessBehavior">ProcessBehavior</option>
+                <option value="NetworkBehavior">NetworkBehavior</option>
+                <option value="FileBehavior">FileBehavior</option>
+                <option value="RegistryBehavior">RegistryBehavior</option>
+            </select>
+        </div>   
+        <div class="input-group-prepend">
+                <button type="button" class="btn btn-primary" id="search">Search</button>
+            </div>   
+        </div>
+    </div>
+    <div id="chartContainer"></div>
+
+    <div>
+        <table id="table">
+        </table>
+    </div>
+
+    <script>
+        $(function() {
+            $('#daterange').daterangepicker();
+
+            $('#search').click(function() {
+                epid = $('#epid').val();
+                daterange = $('#daterange').val();
+                behav = $('#behavtype').val();
+
+                var table = $('#table').DataTable({
+                    destroy: true,
+                    autoWidth: false,
+                    ajax: {
+                        url: '/ajax/endpoint/abnormal',
+                        type: 'POST',
+                        data: {
+                            'epid': epid,
+                            'daterange': daterange,
+                            'behav': behav,
+                        },
+                    },
+                    columns: [
+                        { 'data': 'epid', "searchable": true, 'title': 'Endpoint'},
+                        { 'data': 'timestamp', "searchable": true, 'title': 'Timestamp'},
+                        { 'data': 'behavior', "searchable": true, 'title': 'BehaviorType'},
+                        { 'data': 'attck', "searchable": true, 'title': 'ATT&CK IDs'},
+                        { 'data': 'value', "searchable": true, 'title': 'Value', "width": '100px'},
+                    ],
+                });
+
+                table.on('xhr', function(e, settings, json) {
+                    d3.selectAll($('svg').toArray()).remove()
+                    var svg = dimple.newSvg("#chartContainer", 800, 600);
+                    
+                    data = []
+                    json['data'].forEach(function(d) {
+                        data.push({
+                            'Shift': d['behavior'],
+                            "Day": d["timestamp"].substring(0, 10),
+                            "Time of Day": '2019-04-29 ' + d["timestamp"].substring(11, d["timestamp"].length),
+                            'Value': d['value'],
+                        })
+                    }, this);
+                    console.log(data);
+                    // Create the chart
+                    var myChart = new dimple.chart(svg, data);
+                    myChart.setBounds(40, 30, 700, 500);
+
+                    // Create a standard bubble of SKUs by Price and Sales Value
+                    // We are coloring by Owner as that will be the key in the legend
+                    myChart.addTimeAxis("x", "Day", "%Y-%m-%d", "%Y-%m-%d");
+                    var y = myChart.addTimeAxis("y", "Time of Day", "%Y-%m-%d %H:%M:%S", "%H:%M:%S");
+                    y.overrideMin = new Date("2019-04-29 00:00:00");
+                    y.overrideMax = new Date("2019-04-29 24:00:00");
+                    myChart.addCategoryAxis("z", 'Value');
+                    myChart.addSeries("Shift", dimple.plot.bubble);
+                    var myLegend = myChart.addLegend(530, 100, 60, 300, "Right");
+                    myChart.draw();               
+                });
+            })
+        });
+    </script>
+{% endblock %}

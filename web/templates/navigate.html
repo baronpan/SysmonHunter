@@ -1,0 +1,35 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <!-- Navbar content -->
+    <a class="navbar-brand" href="#">Sysmon Hunter</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+        <li class="nav-item dropdown active">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Event Data
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="/event/raw">Raw</a>
+            <a class="dropdown-item" href="/event/abnormal">Abnormal</a>
+        </li>
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Hunter Tools
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">    
+            <a class="dropdown-item" href="/statistic/behavior/process">ProcessBehavior</a>
+            <a class="dropdown-item" href="/statistic/behavior/file">FileBehavior</a>
+            <a class="dropdown-item" href="/statistic/behavior/network">NetworkBehavior</a>
+            <a class="dropdown-item" href="/statistic/behavior/registry">RegistryBehavior</a>
+            <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="/graphic/manage">Graphic Manage</a>
+                <a class="dropdown-item" href="/graphic/search">Graphic Search</a>
+            <div class="dropdown-divider"></div>                
+            <a class="dropdown-item" href="/endpoint">Endpoint</a>
+        </li>
+        </ul>
+  </div>
+</nav>

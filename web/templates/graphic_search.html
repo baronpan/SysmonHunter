@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block head %}
+    <link href='/static/css/vis.min.css' rel='stylesheet' type='text/css'>
+    <script src='/static/scripts/vis.min.js'></script>
+
+    <style type="text/css">
+        #vis-network {
+            height: 900px;
+            border: 1px solid lightgray;
+        }
+    </style>
+{% endblock %}
+
+{% block container %}
+    <div>
+        <div>
+            <div class="form-group">
+                <span class="input-group-text" id="inputGroup-sizing-default">Query: (keyword per line)</span>
+                <textarea class="form-control rounded-0" id="inputarea" rows="10"></textarea>
+                <div class="input-group-prepend">
+                        <button type="button" class="btn btn-primary" id="search">Query</button> 
+                </div>
+            </div>  
+        </div>
+        <div>
+            <p class="text-justify" id="selectednode"></p>
+            <div id="vis-network">
+            </div>
+        </div>
+        
+    </div>
+
+    <script>
+        $(function() {
+            $('#search').click(function() {
+                $.ajax({
+                    method: 'POST',
+                    url: '/ajax/graphic/query',
+                    data: {
+                        'inputarea': $('#inputarea').val(),
+                    }, 
+                    success: function(data, status, xhr) {
+                        var container = document.getElementById('vis-network');
+                        var network_data = {
+                            nodes: data['nodes'],
+                            edges: data['edges'],
+                        };
+                        var options = {
+                            nodes: {
+                                shape: 'dot',
+                                size: 30,
+                            },
+                            physics: {
+                                forceAtlas2Based: {
+                                    gravitationalConstant: -26,
+                                    centralGravity: 0.005,
+                                    springLength: 230,
+                                    springConstant: 0.18
+                                },
+                                maxVelocity: 146,
+                                solver: 'forceAtlas2Based',
+                                timestep: 0.35,
+                                stabilization: {iterations: 150}
+                            }
+                        };
+                        var network = new vis.Network(container, network_data, options);
+                        network.on('click', function (properties) {
+                            var nodeId = properties.nodes[0];
+                            network_data.nodes.forEach(function(nodedata) {
+                                if (nodedata.id == nodeId) {
+                                    $('#selectednode').text('Selected Node: ' + nodedata.label);
+                                }
+                            });
+                        });
+                    },
+                });
+            });   
+        });
+        
+    </script>
+{% endblock %}

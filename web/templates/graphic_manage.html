@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block head %}
+    <link href='/static/css/datatables.min.css' rel='stylesheet' type='text/css'>
+    <link href='/static/css/select.dataTables.min.css' rel='stylesheet' type='text/css'>
+    <link href='/static/css/buttons.dataTables.min.css' rel='stylesheet' type='text/css'>
+    <script src='/static/scripts/datatables.min.js'></script>
+    <script src='/static/scripts/dataTables.select.min.js'></script>
+    <script src='/static/scripts/dataTables.buttons.min.js'></script>
+{% endblock %}
+
+{% block container %}
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">Select Node type : </span>
+          </div>
+          <div class="input-group-prepend">
+            <select class="custom-select" id="nodetype">
+                <option value="processbehav" selected>ProcessBehavior</option>
+                <option value="regbehav" selected>RegistryBehavior</option>
+                <option value="filebehav" selected>FileBehavior</option>
+                <option value="netbehav" selected>NetworkBehavior</option>
+                <option value="domain">Domain</option>
+                <option value="ip">IP</option>
+                <option value="hash">FileHash</option>
+                <option value="path">Path</option>
+                <option value="reg">RegistryPath</option>
+                <option value="epuuid">Endpoint</option>
+            </select>
+        </div>   
+        <div class="input-group-prepend">
+                <button type="button" class="btn btn-primary" id="search">Query</button> 
+        </div>
+    </div>
+    <div>
+        
+        <table id="table">
+        </table>
+    </div>
+
+    <script>
+        $(function() {
+
+            $('#search').click(function() {
+                
+                var table = $('#table').DataTable({
+                    destroy: true,
+                    select: 'multi',
+                    search: {
+                        regex: true,
+                    },
+                    autoWidth: false,
+                    ajax: {
+                        url: '/ajax/graphic/degree',
+                        type: 'POST',
+                        data: {
+                            'nodetype': $('#nodetype').val(),
+                        },
+                    },
+                    columns: [
+                        { 'data': 'name', "searchable": true, 'title': 'Node value', width: '500px'},
+                        { 'data': 'in', "searchable": true, 'title': 'InDegree'},
+                        { 'data': 'out', "searchable": true, 'title': 'OutDegree'},
+                    ],
+                    dom: 'Blfrtip',
+                    buttons: [
+                        {
+                            text: 'Delete selected nodes',
+                            action: function(e, dt, node, config) {
+                                len = dt.rows('.selected').data().length;
+                                values = [];
+                                for (i = 0; i < len; i++) {
+                                    values.push(dt.rows('.selected').data()[i]['name']);
+                                }
+                                $.ajax({
+                                    method: 'POST',
+                                    url: '/ajax/graphic/delete',
+                                    data: {
+                                        'nodetype': $('#nodetype').val(),
+                                        'nodevalues': JSON.stringify(values),
+                                    }, 
+                                });
+                                dt.rows('.selected').remove().draw( false );
+                            },
+                        }
+                    ]
+                });
+            })
+
+            
+        });
+    </script>
+{% endblock %}
