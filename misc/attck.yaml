@@ -1,0 +1,729 @@
+T1003:
+  name: Credential Dumping
+  description: 
+  level: critical
+  phase: Credential Access
+  query:
+    - type: reg
+      reg:
+        path:
+          pattern: HKLM\SAM|HKLM\Security
+      process:
+        image:
+          pattern: \\Windows\\.+\\lsass.exe
+          flag: regex
+          op: not
+      op: and
+
+T1004:
+  name: Winlogon Helper DLL
+  description: 
+  level: medium
+  phase: Persistence
+  query:
+    - type: reg
+      reg:
+        path: 
+          pattern: \Microsoft\Windows NT\CurrentVersion\Winlogon\Notify|\Microsoft\Windows NT\CurrentVersion\Winlogon\Userinit|\Microsoft\Windows NT\CurrentVersion\Winlogon\Shell
+    - type: process
+      process:
+        cmdline: 
+          pattern: \Microsoft\Windows NT\CurrentVersion\Winlogon\Notify|\Microsoft\Windows NT\CurrentVersion\Winlogon\Userinit|\Microsoft\Windows NT\CurrentVersion\Winlogon\Shell
+
+T1028:
+  name: Windows Remote Management
+  description: 
+  level: medium
+  phase: Execution, Lateral Movement
+  query:
+    - type: process
+      process:
+        any:
+          pattern: winrm.exe
+
+T1035:
+  name: Service Execution
+  description: 
+  level: medium
+  phase: Execution
+  query:
+    - type: process
+      process:
+        image: 
+          pattern: \\Windows\\.+\\sc.exe
+          flag: regex
+        cmdline:
+          pattern: start|create|query|config
+    - type: process
+      process:
+        cmdline:
+          pattern: \SYSTEM\CurrentControlSet\services
+    - type: reg
+      reg:
+        path:
+          pattern: \SYSTEM\CurrentControlSet\services
+      process:
+        image:
+          pattern: \\Windows\\.+\\lsass.exe|\\Windows\\.+\\svchost.exe
+          flag: regex
+          op: not
+      op: and
+
+T1042:
+  name: Change Default File Association
+  description: 
+  level: medium
+  phase: Persistence
+  query:
+    - type: reg
+      reg:
+        path: 
+          pattern: \\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts|HKCR\\.+\\shell\\open\\command
+          flag: regex
+      process:
+        image:
+          pattern: Windows\Explorer.EXE
+          op: not
+      op: and
+    - type: process
+      process:
+        any:
+          pattern: assoc.exe
+
+T1053:
+  name: Scheduled Task
+  description: 
+  level: high
+  phase: Execution
+  query:
+    - type: process
+      process:
+        image: 
+          pattern: \\Windows\\.+\\at.exe
+          flag: regex
+    - type: process
+      process:
+        image: 
+          pattern: \\Windows\\.+\\schtasks.exe
+          flag: regex
+        cmdline:
+          pattern: /Create
+
+T1059:
+  name: Command-Line Interface
+  description: 
+  level: medium
+  phase: Execution
+  query:
+    - type: process
+      process:
+        image: 
+          pattern: \\Windows\\.+\\cmd.exe
+          flag: regex
+    - type: process
+      process:
+        cmdline: 
+          pattern: cmd.exe|/c
+          op: and
+
+T1060:
+  name: Registry Run Keys / Startup Folder
+  description: 
+  level: high
+  phase: Persistence
+  query:
+    - type: reg
+      reg:
+        path: 
+          pattern: Software\Microsoft\Windows\CurrentVersion\Run|Software\Microsoft\Windows\CurrentVersion\RunOnce|Software\Microsoft\Windows\CurrentVersion\RunOnceEx|Software\Microsoft\Windows\CurrentVersion\RunServicesOnce|Software\Microsoft\Windows\CurrentVersion\RunServices|SOFTWARE\Microsoft\Windows\CurrentVersion\ShellServiceObjectDelayLoad|Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run|Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders|Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders
+    - type: process
+      process:
+        cmdline:
+          pattern: \Microsoft\Windows\Start Menu\Programs\Startup|Software\Microsoft\Windows\CurrentVersion\Run|Software\Microsoft\Windows\CurrentVersion\RunOnce|Software\Microsoft\Windows\CurrentVersion\RunOnceEx|Software\Microsoft\Windows\CurrentVersion\RunServicesOnce|Software\Microsoft\Windows\CurrentVersion\RunServices|SOFTWARE\Microsoft\Windows\CurrentVersion\ShellServiceObjectDelayLoad|Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run|Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders|Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders
+      file:
+        path:
+          pattern: \Microsoft\Windows\Start Menu\Programs\Startup
+    - type: file
+      process:
+        cmdline:
+          pattern: \Microsoft\Windows\Start Menu\Programs\Startup
+      file:
+        path:
+          pattern: \Microsoft\Windows\Start Menu\Programs\Startup
+
+T1064:
+  name: Scripting
+  description: 
+  level: high
+  phase: Execution
+  query:
+    - type: process
+      process:
+        any: 
+          pattern: wscript.exe|cscript.exe
+
+T1070:
+  name: Indicator Removal on Host
+  description: 
+  level: high
+  phase: Defense Evasion
+  query:
+    - type: process
+      process:
+        image: 
+          pattern: wevtutil
+        cmdline:
+          pattern: cl
+    - type: process
+      process:
+        cmdline:
+          pattern: wevtutil|cl
+          op: and
+    - type: process
+      process:
+        cmdline:
+          pattern: fsutil|usn|deletejournal
+          op: and
+    - type: process
+      process:
+        image:
+          pattern: fsutil
+        cmdline:
+          pattern: usn|deletejournal
+          op: and
+
+T1037:
+  name: Logon Scripts
+  description: 
+  level: medium
+  phase: Persistence
+  query:
+    - type: process
+      process:
+        cmdline:
+          pattern: \Environment\UserInitMprLogonScript
+    - type: reg
+      reg:
+        path:
+          pattern: \Environment\UserInitMprLogonScript
+
+T1076:
+  name: Remote Desktop Protocol
+  description: 
+  level: medium
+  phase: Lateral Movement
+  query:
+    - type: process
+      process:
+        any: 
+          pattern: mstsc.exe|tscon.exe
+
+T1085:
+  name: Rundll32
+  description: 
+  level: medium
+  phase: Execution
+  query:
+    - type: process
+      process:
+        image:
+          pattern: \\Windows\\.+\\rundll32.exe
+          flag: regex
+        cmdline:
+          pattern: vbscript|javascript|http|https|.dll
+
+T1086:
+  name: PowerShell
+  description: 
+  level: high
+  phase: Execution
+  query:
+    - type: process
+      process:
+        image:
+          pattern: \\Windows\\.+\\WindowsPowerShell\\.+\\powershell.exe
+          flag: regex
+        cmdline:
+          pattern: hidden|-enc|-NonI
+
+T1088:
+  name: UAC bypass
+  description: 
+  level: high
+  phase: Privilege Escalation
+  query:
+    - type: reg
+      reg: 
+        path:
+          pattern: Software\Classes\mscfile\shell\open\command
+    - type: process
+      process:
+        cmdline:
+          pattern: Software\Classes\mscfile\shell\open\command
+    - type: reg
+      reg: 
+        path:
+          pattern: \Software\Microsoft\Windows\CurrentVersion\App Paths\control.exe|\Software\Classes\exefile\shell\runas\command\isolatedCommand
+    - type: process
+      process:
+        cmdline:
+          pattern: \Software\Microsoft\Windows\CurrentVersion\App Paths\control.exe|\Software\Classes\exefile\shell\runas\command\isolatedCommand
+    - type: reg
+      reg: 
+        path:
+          pattern: \Software\Classes\ms-settings\shell\open\command
+    - type: process
+      process:
+        cmdline:
+          pattern: \Software\Classes\ms-settings\shell\open\command
+    - type: reg
+      reg: 
+        path:
+          pattern: \SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\cmmgr32.exe
+    - type: process
+      process:
+        cmdline:
+          pattern: \SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\cmmgr32.exe
+        
+
+T1101:
+  name: Security Support Provider
+  description: 
+  level: medium
+  phase: Persistence
+  query:
+    - type: reg
+      reg:
+        path:
+          pattern: SYSTEM\CurrentControlSet\Control\Lsa\Security Packages|SYSTEM\CurrentControlSet\Control\Lsa\OSConfig\Security Packages
+    - type: process
+      process:
+        cmdline:
+          pattern: SYSTEM\CurrentControlSet\Control\Lsa\Security Packages|SYSTEM\CurrentControlSet\Control\Lsa\OSConfig\Security Packages
+
+T1103:
+  name: AppInit DLLs
+  description: 
+  level: medium
+  phase: Persistence
+  query:
+    - type: reg
+      reg:
+        path:
+          pattern: Microsoft\Windows NT\CurrentVersion\Windows\AppInit_DLLs|Microsoft\Windows NT\CurrentVersion\Windows\LoadAppInit_DLLs
+
+T1117:
+  name: Regsvr32
+  description: 
+  level: medium
+  phase: Execution
+  query:
+    - type: process
+      process:
+        image: 
+          pattern: \\Windows\\.+\\regsvr32.exe
+          flag: regex
+        cmdline:
+          pattern: /s|/i
+          op: and
+
+T1122:
+  name: Component Object Model Hijacking
+  description: 
+  level: medium
+  phase: Persistence
+  query:
+    - type: reg
+      reg:
+        path: 
+          pattern: \\Software\\Classes\\CLSID\\.+\\InprocServer32
+          flag: regex
+    - type: process
+      process:
+        cmdline:
+          pattern: \\Software\\Classes\\CLSID\\.+\\InprocServer32
+          flag: regex
+
+T1128: 
+  name: Netsh Helper DLL
+  description: 
+  level: medium
+  phase: Persistence
+  query:
+    - type: reg
+      reg:
+        path: 
+          pattern: \SOFTWARE\Microsoft\NetSh
+    - type: process
+      process:
+        image:
+          pattern: \\Windows\\.+\\netsh.exe
+        cmdline:
+          pattern: add|helper
+          op: and
+
+T1131:
+  name: Authentication Package
+  description: 
+  level: medium
+  phase: Persistence
+  query:
+    - type: reg
+      reg:
+        path:
+          pattern: \SYSTEM\CurrentControlSet\Control\Lsa\Authentication Packages
+    - type: process
+      process:
+        cmdline:
+          pattern: \SYSTEM\CurrentControlSet\Control\Lsa\Authentication Packages
+
+T1138:
+  name: Application Shimming
+  description: 
+  level: medium
+  phase: Persistence
+  query:
+    - type: process
+      process: 
+        image: 
+          pattern: sdbinst.exe
+        cmdline:
+          pattern: \SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Custom|\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\InstalledSDB
+    - type: reg
+      reg:
+        path:
+          pattern: \SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Custom|\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\InstalledSDB
+
+T1140:
+  name: Deobfuscate/Decode Files or Information
+  description: 
+  level: high
+  phase: Defense Evasion, Execution
+  query:
+    - type: process
+      process:
+        image:
+          pattern: certutil.exe
+        cmdline:
+          pattern: -decode|-urlcache
+    - type: process
+      process:
+        cmdline:
+          pattern: certutil.exe|-decode|-urlcache
+
+T1170:
+  name: Mshta
+  description: 
+  level: medium
+  phase: Execution
+  query:
+    - type: process
+      process:
+        image:
+          pattern: \\windows\\.+\\mshta.exe
+          flag: regex
+        cmdline:
+          pattern: vbscript|javascript|http|https
+
+T1180:
+  name: Screensaver
+  description: 
+  level: medium
+  phase: Persistence
+  query:
+    - type: reg
+      reg:
+        path:
+          pattern: Control Panel\Desktop\SCRNSAVE.EXE
+    - type: process
+      process:
+        cmdline:
+          pattern: Control Panel\Desktop\SCRNSAVE.EXE
+
+T1182:
+  name: AppCert DLLs
+  description: 
+  level: medium
+  phase: Persistence
+  query:
+    - type: reg
+      reg:
+        path:
+          pattern: \SYSTEM\CurrentControlSet\Control\Session Manager\AppCertDLLs
+    - type: process
+      process:
+        cmdline:
+          pattern: \SYSTEM\CurrentControlSet\Control\Session Manager\AppCertDLLs
+
+
+T1183:
+  name: Image File Execution Options Injection
+  description: 
+  level: medium
+  phase: Persistence
+  query:
+    - type: reg
+      reg:
+        path: 
+          pattern: Microsoft\Windows NT\CurrentVersion\Image File Execution Options\|SOFTWARE\Microsoft\Windows NT\CurrentVersion\SilentProcessExit
+    - type: process
+      process:
+        cmdline: 
+          pattern: Microsoft\Windows NT\CurrentVersion\Image File Execution Options\|SOFTWARE\Microsoft\Windows NT\CurrentVersion\SilentProcessExit
+
+T1191:
+  name: CMSTP
+  description: 
+  level: medium
+  phase: Execution
+  query:
+    - type: process
+      process:
+        image: 
+          pattern: cmstp.exe
+        cmdline:
+          pattern: /s|/ns|/au
+
+T1196:
+  name: Control Panel Items
+  description: 
+  level: medium
+  phase: Execution
+  query:
+    - type: process
+      process:
+        image: 
+          pattern: \\Windows\\.+\\control.exe
+          flag: regex
+    - type: process
+      process:
+        cmdline:
+          pattern: Shell32.dll,Control_RunDLL|.cpl
+          op: and
+      process:
+        cmdline:
+          pattern: Shell32.dll,Control_RunDLLAsUser|.cpl
+          op: and
+
+T1197:
+  name: BITS Jobs
+  description: 
+  level: medium
+  phase: Execution
+  query:
+    - type: process
+      process:
+        any:
+          pattern: bitsadmin.exe
+
+T1202:
+  name: Indirect Command Execution
+  description: 
+  level: medium
+  phase: Execution
+  query:
+    - type: process
+      process:
+        any:
+          pattern: pcalua.exe
+
+T1216:
+  name: Signed Script Proxy Execution
+  description: 
+  level: high
+  phase: Execution
+  query:
+    - type: process
+      process:
+        any:
+          pattern: PubPrn.vbs
+      file:
+        path:
+          pattern: PubPrn.vbs
+
+T1218:
+  name: Signed Binary Proxy Execution
+  description: 
+  level: medium
+  phase: Execution
+  query:
+    - type: process
+      process:
+        any:
+          pattern: mavinject.exe|SyncAppvPublishingServer.exe
+
+T1220:
+  name: XSL Script Processing
+  description: 
+  level: medium
+  phase: Execution
+  query:
+    - type: process
+      process:
+        any:
+          pattern: msxsl.exe
+    - type: process
+      process:
+        image: 
+          pattern: wmic.exe
+        cmdline:
+          pattern: process|list|/FORMAT|.xsl
+          op: and
+    - type: process
+      process:
+        image: 
+          pattern: wmic.exe
+        cmdline:
+          pattern: os|get|/FORMAT|.xsl
+          op: and
+
+T1223:
+  name: Compiled HTML File
+  description: 
+  level: medium
+  phase: Execution
+  query:
+    - type: process
+      process:
+        image:
+          pattern: \windows\hh.exe
+      file:
+        path:
+          pattern: .chm
+    - type: process
+      process:
+        cmdline:
+          pattern: hh.exe|.chm
+          op: and
+      
+
+
+
+C1000:
+  name: Registry Execution
+  description: 
+  level: medium
+  phase: Execution
+  query:
+    - type: process
+      process:
+        image:
+          pattern: \\Windows\\.+\\reg.exe
+          flag: regex
+
+C1001:
+  name: Lateral Movement
+  description: 
+  level: high
+  phase: Lateral Movement
+  query:
+    - type: process
+      process:
+        image:
+          pattern: nbtscan.exe|psexec
+    - type: process
+      process:
+        cmdline:
+          pattern: net|user|add
+          op: and
+    - type: process
+      process:
+        cmdline:
+          pattern: net|/add
+          op: and
+
+C1002:
+  name: .Net Environment Execution
+  description: 
+  level: medium
+  phase: Execution
+  query:
+    - type: process
+      process:
+        any:
+          pattern: \\Windows\\Microsoft.NET\\Framework\\.+\\csc.exe|\\Windows\\Microsoft.NET\\Framework\\.+\\InstallUtil.exe|\\Windows\\Microsoft.NET\\Framework\\.+\\RegAsm.exe|\\Windows\\Microsoft.NET\\Framework\\.+\\RegSvcs.exe|\\Windows\\Microsoft.NET\\Framework\\.+\\MSBuild.exe|\\Windows\\Microsoft.NET\\Framework\\.+\\taskhost.exe
+          flag: regex
+
+C1003:
+  name:
+  description: 
+  level: high
+  phase: Defense Evasion
+  query:
+    - type: process
+      process:
+        image:
+          pattern: inetsrv\appcmd.exe
+        cmdline:
+          pattern: /dontLog:true
+    - type: process
+      process:
+        image:
+          pattern: fltmc.exe
+        cmdline:
+          pattern: unload|detach
+    - type: process
+      process:
+        image:
+          pattern: vssadmin.exe
+        cmdline:
+          pattern: Delete|Shadows
+          op: and
+    - type: process
+      process:
+        image:
+          pattern: wbadmin
+        cmdline:
+          pattern: delete
+
+C1004:
+  name: Discovery
+  description: 
+  level: medium
+  phase: Discovery
+  query:
+    - type: process
+      process:
+        image:
+          pattern: \\Windows\\.+\\net.exe|wmic.exe|\\Windows\\.+\\ipconfig.exe|nbtstat|tasklist.exe|systeminfo.exe
+          flag: regex
+    - type: process
+      process:
+        image:
+          pattern: \\Windows\\.+\\sc.exe
+          flag: regex
+        cmdline:
+          pattern: query
+    - type: process
+      process:
+        image:
+          pattern: \\Windows\\.+\\netsh.exe
+          flag: regex
+        cmdline:
+          pattern: advfirewall
+
+
+C1005:
+  name: Abnormal Office Execution
+  description: 
+  level: high
+  phase: Execution
+  query:
+    - type: procchain
+      parent:
+        image: 
+          pattern: word.exe|excel.exe|hwp.exe|wps.exe|et.exe
+      child:
+        image:
+          pattern: cmd.exe|wscript.exe|cscript.exe|powershell.exe|rundll32.exe|regsvr32.exe|schtasks.exe|wmic.exe|reg.exe|mshta.exe
+
+C1006:
+  name: HTTP or HTTPS Communication
+  description: 
+  level: medium
+  phase: Command and Control
+  query:
+    - type: network
+      network:
+        rport: 
+          pattern: 80|443

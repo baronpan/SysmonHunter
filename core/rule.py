@@ -53,7 +53,12 @@ def match_process_behavior(behavior, ruleset):
         if 'file' in cond.keys():
             bresult.append(match_entity(behavior.file, cond['file']))
 
-        if op_or(bresult):
+        is_matched = False
+        if 'op' in cond.keys() and cond['op'] == 'and':
+            is_matched = op_and(bresult)
+        else:
+            is_matched = op_or(bresult)
+        if is_matched:
             return True
     return False
 
@@ -69,7 +74,12 @@ def match_network_behavior(behavior, ruleset):
         if 'file' in cond.keys():
             bresult.append(match_entity(behavior.file, cond['file']))
 
-        if op_or(bresult):
+        is_matched = False
+        if 'op' in cond.keys() and cond['op'] == 'and':
+            is_matched = op_and(bresult)
+        else:
+            is_matched = op_or(bresult)
+        if is_matched:
             return True
     return False
 
@@ -83,7 +93,12 @@ def match_file_behavior(behavior, ruleset):
         if 'file' in cond.keys():
             bresult.append(match_entity(behavior.file, cond['file']))
 
-        if op_or(bresult):
+        is_matched = False
+        if 'op' in cond.keys() and cond['op'] == 'and':
+            is_matched = op_and(bresult)
+        else:
+            is_matched = op_or(bresult)
+        if is_matched:
             return True
     return False
     
@@ -100,7 +115,12 @@ def match_registry_behavior(behavior, ruleset):
         if 'reg' in cond.keys():
             bresult.append(match_entity(behavior.reg, cond['reg']))
 
-        if op_or(bresult):
+        is_matched = False
+        if 'op' in cond.keys() and cond['op'] == 'and':
+            is_matched = op_and(bresult)
+        else:
+            is_matched = op_or(bresult)
+        if is_matched:
             return True
     return False
 
