@@ -8,12 +8,12 @@ from utils.log import *
 from utils.common import *
 from db.es import ES
 from db.graph import Neo4jGraph
-from middleware import *
+from web.middleware import *
 from core import attck
 from db import esapi
 import analyst.statistic as ast
 
-app = Flask(__name__, template_folder='templates', static_folder='static')
+app = Flask(__name__, template_folder='web/templates', static_folder='web/static')
 
 @app.route('/', methods=['GET'])
 def main_handler():
