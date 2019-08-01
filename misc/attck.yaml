@@ -14,6 +14,11 @@ T1003:
           flag: regex
           op: not
       op: and
+    - type: file
+      file:
+        path:
+          pattern: \\Windows\\.+\\bcryptprimitives.dll|\\Windows\\.+\\bcrypt.dll|\\Windows\\.+\\ncrypt.dll
+          flag: regex
 
 T1004:
   name: Winlogon Helper DLL
@@ -255,11 +260,11 @@ T1088:
     - type: reg
       reg: 
         path:
-          pattern: Software\Classes\mscfile\shell\open\command
+          pattern: Software\Classes\mscfile\shell\open\command|mscfile\shell\open\command
     - type: process
       process:
         cmdline:
-          pattern: Software\Classes\mscfile\shell\open\command
+          pattern: Software\Classes\mscfile\shell\open\command|mscfile\shell\open\command
     - type: reg
       reg: 
         path:
@@ -727,3 +732,23 @@ C1006:
       network:
         rport: 
           pattern: 80|443
+
+C1005:
+  name: IE DCOM Launch
+  description: 
+  level: medium
+  phase: Execution
+  query:
+    - type: procchain
+      parent:
+        image: 
+          pattern: \\Windows\\.+\\svchost.exe
+          flag: regex
+        cmdline:
+          pattern: -k|DcomLaunch
+          op: and
+      child:
+        image:
+          pattern: \Internet Explorer\iexplore.exe
+        cmdline:
+          pattern: -Embedding

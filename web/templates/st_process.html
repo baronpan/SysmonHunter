@@ -98,7 +98,8 @@
                                         { 'data': 'epid', "searchable": true, 'title': 'Endpoint'},
                                         { 'data': 'timestamp', "searchable": true, 'title': 'Timestamp'},
                                         { 'data': 'behavior', "searchable": true, 'title': 'BehaviorType'},
-                                        { 'data': 'attck', "searchable": true, 'title': 'ATT&CK IDs'},
+                                        { 'data': 'attck', "searchable": true, 'title': 'ATT&CK IDs', render: function(data, type, row) {
+                                            return '<div title="' + data.split('\t')[1] + '">' + data.split('\t')[0] + '</div>'; }},
                                         { 'data': 'value', "searchable": true, 'title': 'Value'},
                                     ],
                                 });

@@ -7,10 +7,10 @@ from core.attck import ATTCKTech
 from core.utils import *
 
 CONDITION_MAPPING = {
-    'ProcessBehavior': 'process',
-    'NetworkBehavior': 'network',
-    'FileBehavior': 'file',
-    'RegistryBehavior': 'reg',
+    'ProcessBehavior': ['process', 'procchain'],
+    'NetworkBehavior': ['network'],
+    'FileBehavior': ['file'],
+    'RegistryBehavior': ['reg'],
 }
 
 def filter_abnormal_behaviors(behaviors, rules):
@@ -30,7 +30,7 @@ def match(behavior, rules):
     
     for rule_id, ruleset in rules.iteritems():
         is_matched = False
-        rules = [rule for rule in ruleset.conditions if rule['type'] == CONDITION_MAPPING[behavior_type]]
+        rules = [rule for rule in ruleset.conditions if rule['type'] in CONDITION_MAPPING[behavior_type]]
         if behavior_type == 'ProcessBehavior':
             is_matched = match_process_behavior(behavior, rules)
         elif behavior_type == 'NetworkBehavior':
@@ -49,6 +49,9 @@ def match_process_behavior(behavior, ruleset):
 
         if 'process' in cond.keys():
             bresult.append(match_entity(behavior.parent, cond['process']) or match_entity(behavior.current, cond['process']))
+
+        if 'parent' in cond.keys() and 'child' in cond.keys():
+            bresult.append(match_entity(behavior.parent, cond['parent']) and match_entity(behavior.current, cond['child']))
         
         if 'file' in cond.keys():
             bresult.append(match_entity(behavior.file, cond['file']))

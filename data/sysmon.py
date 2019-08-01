@@ -266,7 +266,7 @@ class SysmonData(object):
                 if func:
                     behavior_list.append(func(eid, mid, props))
             except Exception as e:
-                log_error('Error: {} {}-{}'.format(e, eid, repr(props)))
+                log_error('Error: {}'.format(e))
                     
         return behavior_list
 

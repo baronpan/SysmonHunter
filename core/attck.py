@@ -46,3 +46,8 @@ def load_attcks(yaml_path):
         for _id, e in rules.iteritems():
             techs[_id] = ATTCKTech(_id, e)
     return techs
+
+def get_attcks_name(ids, techs):
+    id_list = ids.split(', ')
+    id_names = [techs[_id].name for _id in id_list if _id in techs.keys()]
+    return ','.join(id_names)

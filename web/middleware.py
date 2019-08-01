@@ -7,6 +7,7 @@ from core.behavior import *
 
 from db import esapi
 import analyst.statistic as ast
+from core.attck import *
 
 def daterange_format(d):
     start = d.split(' - ')[0]
@@ -30,7 +31,7 @@ def get_event(event_type, behav_type, timerange, callfunc, **kwargs):
             'epid': behav.endpoint['uuid'],
             'timestamp': behav.date,
             'behavior': behav.getname(),
-            'attck': behav.attck_ids,
+            'attck': '{}\t{}'.format(behav.attck_ids, get_attcks_name(behav.attck_ids, server.ATTCK_TECHS)),
             'value': behav.get_value(),
         })
     return result
@@ -68,7 +69,7 @@ def get_st_details_data(event_type, behav_type, timerange, conds):
             'epid': en['endpoint.uuid'],
             'timestamp': en['timestamp'],
             'behavior': en['behaviortype'],
-            'attck': en['attckids'],
+            'attck': '{}\t{}'.format(en['attckids'], get_attcks_name(en['attckids'], server.ATTCK_TECHS)),
             'value': en['value'],
         })
         

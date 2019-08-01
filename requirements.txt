@@ -3,3 +3,4 @@ elasticsearch
 neo4j
 termcolor
 flask
+pyyaml
