@@ -37,7 +37,7 @@ Sysmon logs supports two ways to collect.
 
 Usage for `agent.py`:
 
-![](./docs/agent usage.png)
+![](https://github.com/baronpan/SysmonHunter/blob/master/docs/agent%20usage.png)
 
 For examples:
 
