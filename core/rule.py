@@ -135,9 +135,9 @@ def match_entity(entity, cond):
             bresult.append(__prop_query(entity.props[p], cond['any']))
         return op_or(bresult)
     
-    for p in cond.keys():
-        if p in entity.props.keys():
-            bresult.append(__prop_query(entity.props[p], cond[p]))
+    for c_p in cond.keys():
+        if e_p in entity.props.keys():
+            bresult.append(__prop_query(entity.props[e_p], cond[c_p]))
     return op_and(bresult)
 
 # 默认 op 是 or
